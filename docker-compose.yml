@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://ilmi_user:ilmi_password@db:5432/ilmi_admin_portal
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-here-change-in-production}
+      - JWT_EXPIRES_IN=1h
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_your_stripe_secret_key_here}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_your_webhook_secret_here}
+      - PORT=3000
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - ilmi-network
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=ilmi_admin_portal
+      - POSTGRES_USER=ilmi_user
+      - POSTGRES_PASSWORD=ilmi_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ilmi-network
+
+volumes:
+  postgres_data:
+
+networks:
+  ilmi-network:
+    driver: bridge

@@ -1,5 +1,8 @@
 import { Options } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { config as loadEnv } from 'dotenv';
+
+loadEnv();
 import { Organization } from './src/entities/Organization';
 import { User } from './src/entities/User';
 import { License } from './src/entities/License';
