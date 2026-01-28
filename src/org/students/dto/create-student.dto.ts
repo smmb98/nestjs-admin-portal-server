@@ -8,7 +8,7 @@ export class CreateStudentDto {
   })
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Password for the student account',
@@ -18,5 +18,5 @@ export class CreateStudentDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(6)
-  password: string;
+  password!: string;
 }

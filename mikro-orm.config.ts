@@ -1,8 +1,14 @@
-import { Options } from '@mikro-orm/core';
-import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { defineConfig } from '@mikro-orm/postgresql';
 import { config as loadEnv } from 'dotenv';
 
 loadEnv();
+
+if (!process.env.DATABASE_URL || process.env.DATABASE_URL.trim() === '') {
+  throw new Error(
+    'DATABASE_URL environment variable is required and must not be empty. Please provide a valid database connection string.',
+  );
+}
+
 import { Organization } from './src/entities/Organization';
 import { User } from './src/entities/User';
 import { License } from './src/entities/License';
@@ -16,8 +22,7 @@ import { Payment } from './src/entities/Payment';
 import { Message } from './src/entities/Message';
 import { Conversation } from './src/entities/Conversation';
 
-const config: Options = {
-  driver: PostgreSqlDriver,
+const config = defineConfig({
   clientUrl: process.env.DATABASE_URL,
   entities: [
     Organization,
@@ -37,6 +42,6 @@ const config: Options = {
     path: 'dist/migrations',
     pathTs: 'src/migrations',
   },
-};
+});
 
 export default config;

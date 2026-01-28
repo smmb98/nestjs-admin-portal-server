@@ -14,7 +14,7 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.em.findOne(User, { email });
-    if (user && await bcrypt.compare(password, user.passwordHash)) {
+    if (user && (await bcrypt.compare(password, user.passwordHash))) {
       return user;
     }
     return null;
@@ -23,8 +23,14 @@ export class AuthService {
   async login(user: User): Promise<{ access_token: string }> {
     // Check license validation
     if (user.organization) {
-      const license = await this.em.findOne(License, { organization: user.organization });
-      if (!license || license.status !== 'ACTIVE' || license.expiresAt < new Date()) {
+      const license = await this.em.findOne(License, {
+        organization: user.organization,
+      });
+      if (
+        !license ||
+        license.status !== 'ACTIVE' ||
+        license.expiresAt < new Date()
+      ) {
         throw new UnauthorizedException('License is not valid');
       }
     }
@@ -37,6 +43,6 @@ export class AuthService {
 
   async logout(): Promise<{ message: string }> {
     // Since JWT is stateless, logout is handled on client side by removing token
-    return { message: 'Logged out successfully' };
+    return await Promise.resolve({ message: 'Logged out successfully' });
   }
 }

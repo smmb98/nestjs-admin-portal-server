@@ -1,5 +1,10 @@
 import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { LicensesService } from './licenses.service';
 import { AssignLicenseDto } from './dto/assign-license.dto';
 import { RevokeLicenseDto } from './dto/revoke-license.dto';
@@ -19,7 +24,7 @@ export class LicensesController {
   @ApiOperation({ summary: 'Assign a license to a student' })
   @ApiResponse({ status: 201, description: 'License assigned successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  assign(@Body() assignLicenseDto: AssignLicenseDto, @Request() req) {
+  assign(@Body() assignLicenseDto: AssignLicenseDto, @Request() req: any) {
     return this.licensesService.assign(assignLicenseDto, req.user.id);
   }
 
@@ -27,7 +32,7 @@ export class LicensesController {
   @ApiOperation({ summary: 'Revoke a license from a student' })
   @ApiResponse({ status: 200, description: 'License revoked successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  revoke(@Body() revokeLicenseDto: RevokeLicenseDto, @Request() req) {
+  revoke(@Body() revokeLicenseDto: RevokeLicenseDto, @Request() req: any) {
     return this.licensesService.revoke(revokeLicenseDto, req.user.id);
   }
 }

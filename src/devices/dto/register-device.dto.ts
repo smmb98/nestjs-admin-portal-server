@@ -8,10 +8,10 @@ export class RegisterDeviceDto {
   })
   @IsString()
   @IsNotEmpty()
-  deviceUuid: string;
+  deviceUuid!: string;
 
   @ApiProperty({ description: 'Type of the device', example: 'mobile' })
   @IsString()
   @IsNotEmpty()
-  deviceType: string;
+  deviceType!: string;
 }

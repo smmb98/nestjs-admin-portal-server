@@ -35,14 +35,14 @@ export class StudentsController {
   @ApiOperation({ summary: 'Create a new student' })
   @ApiResponse({ status: 201, description: 'Student created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  create(@Body() createStudentDto: CreateStudentDto, @Request() req) {
+  create(@Body() createStudentDto: CreateStudentDto, @Request() req: any) {
     return this.studentsService.create(createStudentDto, req.user.id);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all students for the organization' })
   @ApiResponse({ status: 200, description: 'List of students' })
-  findAll(@Request() req) {
+  findAll(@Request() req: any) {
     return this.studentsService.findAll(req.user.id);
   }
 
@@ -54,7 +54,7 @@ export class StudentsController {
   update(
     @Param('id') id: string,
     @Body() updateStudentDto: UpdateStudentDto,
-    @Request() req,
+    @Request() req: any,
   ) {
     return this.studentsService.update(+id, updateStudentDto, req.user.id);
   }
@@ -64,7 +64,7 @@ export class StudentsController {
   @ApiParam({ name: 'id', type: 'number', description: 'Student ID' })
   @ApiResponse({ status: 200, description: 'Student suspended successfully' })
   @ApiResponse({ status: 404, description: 'Student not found' })
-  suspend(@Param('id') id: string, @Request() req) {
+  suspend(@Param('id') id: string, @Request() req: any) {
     return this.studentsService.suspend(+id, req.user.id);
   }
 
@@ -73,7 +73,7 @@ export class StudentsController {
   @ApiParam({ name: 'id', type: 'number', description: 'Student ID' })
   @ApiResponse({ status: 200, description: 'Student deleted successfully' })
   @ApiResponse({ status: 404, description: 'Student not found' })
-  remove(@Param('id') id: string, @Request() req) {
+  remove(@Param('id') id: string, @Request() req: any) {
     return this.studentsService.remove(+id, req.user.id);
   }
 }

@@ -8,5 +8,5 @@ export class UpdateOrganizationDto {
     example: 'SUSPENDED',
   })
   @IsEnum(['ACTIVE', 'SUSPENDED'])
-  status: 'ACTIVE' | 'SUSPENDED';
+  status!: 'ACTIVE' | 'SUSPENDED';
 }

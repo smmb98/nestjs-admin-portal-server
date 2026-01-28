@@ -7,6 +7,11 @@ import { Organization } from '../entities/Organization';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import Stripe from 'stripe';
 
+interface PaymentCallbackData {
+  transactionId: string;
+  status: string;
+}
+
 @Injectable()
 export class SubscriptionsService {
   private stripe: Stripe;
@@ -53,22 +58,22 @@ export class SubscriptionsService {
         endpointSecret!,
       );
     } catch (err) {
-      throw new Error(`Webhook signature verification failed: ${err.message}`);
+      throw new Error(`Webhook signature verification failed: ${err instanceof Error ? err.message : String(err)}`);
     }
 
     if (event.type === 'payment_intent.succeeded') {
-      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const paymentIntent = event.data.object;
       await this.updatePaymentStatus(paymentIntent.id, 'SUCCESS');
     } else if (event.type === 'payment_intent.payment_failed') {
-      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const paymentIntent = event.data.object;
       await this.updatePaymentStatus(paymentIntent.id, 'FAILED');
     }
   }
 
-  async handleHblCallback(paymentData: any): Promise<void> {
+  async handleHblCallback(paymentData: PaymentCallbackData): Promise<void> {
     // Verify HBL signature/callback
     // This is a placeholder - implement actual HBL verification logic
-    const isValid = this.verifyHblSignature(paymentData);
+    const isValid = this.verifyHblSignature();
 
     if (!isValid) {
       throw new Error('Invalid HBL callback signature');
@@ -80,10 +85,10 @@ export class SubscriptionsService {
     );
   }
 
-  async handleAlfalahCallback(paymentData: any): Promise<void> {
+  async handleAlfalahCallback(paymentData: PaymentCallbackData): Promise<void> {
     // Verify Alfalah signature/callback
     // This is a placeholder - implement actual Alfalah verification logic
-    const isValid = this.verifyAlfalahSignature(paymentData);
+    const isValid = this.verifyAlfalahSignature();
 
     if (!isValid) {
       throw new Error('Invalid Alfalah callback signature');
@@ -149,13 +154,13 @@ export class SubscriptionsService {
     await this.em.flush();
   }
 
-  private verifyHblSignature(paymentData: any): boolean {
+  private verifyHblSignature(): boolean {
     // Placeholder HBL signature verification
     // Implement actual verification logic based on HBL documentation
     return true;
   }
 
-  private verifyAlfalahSignature(paymentData: any): boolean {
+  private verifyAlfalahSignature(): boolean {
     // Placeholder Alfalah signature verification
     // Implement actual verification logic based on Alfalah documentation
     return true;

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -24,7 +22,7 @@ services:
       - ilmi-network
 
   db:
-    image: postgres:15
+    image: postgres:latest
     environment:
       - POSTGRES_DB=ilmi_admin_portal
       - POSTGRES_USER=ilmi_user

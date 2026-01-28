@@ -6,7 +6,12 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { MessagesService } from './messages.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -25,7 +30,10 @@ export class MessagesController {
 
   @Post('conversations')
   @ApiOperation({ summary: 'Create a new conversation' })
-  @ApiResponse({ status: 201, description: 'Conversation created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Conversation created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   createConversation(
     @Body() createConversationDto: CreateConversationDto,

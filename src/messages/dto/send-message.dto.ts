@@ -7,7 +7,7 @@ export class SendMessageDto {
     example: 'Hello, world!',
   })
   @IsString()
-  content: string;
+  content!: string;
 
   @ApiPropertyOptional({ description: 'ID of the recipient user', example: 1 })
   @IsOptional()

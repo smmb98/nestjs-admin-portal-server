@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class LicensesService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(private em: EntityManager) {}
 
   async bulkCreate(
     bulkCreateLicensesDto: BulkCreateLicensesDto,

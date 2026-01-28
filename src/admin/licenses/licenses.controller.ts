@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { LicensesService } from './licenses.service';
 import { BulkCreateLicensesDto } from './dto/bulk-create-licenses.dto';
-import { UpdateLicenseDto } from './dto/update-license.dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';

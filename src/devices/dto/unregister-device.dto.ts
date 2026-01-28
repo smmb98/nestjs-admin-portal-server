@@ -8,5 +8,5 @@ export class UnregisterDeviceDto {
   })
   @IsString()
   @IsNotEmpty()
-  deviceUuid: string;
+  deviceUuid!: string;
 }

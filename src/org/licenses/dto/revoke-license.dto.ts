@@ -8,10 +8,10 @@ export class RevokeLicenseDto {
   })
   @IsNumber()
   @IsNotEmpty()
-  studentId: number;
+  studentId!: number;
 
   @ApiProperty({ description: 'ID of the license to revoke', example: 1 })
   @IsNumber()
   @IsNotEmpty()
-  licenseId: number;
+  licenseId!: number;
 }

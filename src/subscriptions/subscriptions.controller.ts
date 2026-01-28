@@ -1,5 +1,5 @@
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -43,7 +43,7 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Handle Stripe webhook' })
   @ApiResponse({ status: 200, description: 'Webhook received' })
   async handleStripeWebhook(@Req() req: Request) {
-    const signature = req.headers['stripe-signature'] as string;
+    const signature = req.headers.get('stripe-signature') as string;
     const rawBody = (req as any).rawBody as Buffer;
     await this.subscriptionsService.handleStripeWebhook(rawBody, signature);
     return { received: true };

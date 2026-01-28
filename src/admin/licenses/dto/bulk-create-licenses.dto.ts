@@ -10,16 +10,16 @@ import {
 class CreateLicenseDto {
   @IsInt()
   @IsNotEmpty()
-  organizationId: number;
+  organizationId!: number;
 
   @IsDate()
   @Type(() => Date)
-  expiresAt: Date;
+  expiresAt!: Date;
 }
 
 export class BulkCreateLicensesDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateLicenseDto)
-  licenses: CreateLicenseDto[];
+  licenses!: CreateLicenseDto[];
 }

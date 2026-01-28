@@ -1,5 +1,10 @@
 import { Controller, Get, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ProgressService } from './progress.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -14,9 +19,11 @@ export class ProgressController {
 
   @Roles('ORG_ADMIN')
   @Get('org/progress/students')
-  @ApiOperation({ summary: 'Get progress for all students in the organization' })
+  @ApiOperation({
+    summary: 'Get progress for all students in the organization',
+  })
   @ApiResponse({ status: 200, description: 'Students progress data' })
-  async getStudentsProgress(@Request() req) {
+  async getStudentsProgress(@Request() req: any) {
     const orgId = req.user.organization.id;
     return this.progressService.getStudentsProgressForOrg(orgId);
   }
@@ -25,7 +32,7 @@ export class ProgressController {
   @Get('org/progress/summary')
   @ApiOperation({ summary: 'Get progress summary for the organization' })
   @ApiResponse({ status: 200, description: 'Organization progress summary' })
-  async getOrgProgressSummary(@Request() req) {
+  async getOrgProgressSummary(@Request() req: any) {
     const orgId = req.user.organization.id;
     return this.progressService.getOrgProgressSummary(orgId);
   }
@@ -34,7 +41,7 @@ export class ProgressController {
   @Get('student/progress')
   @ApiOperation({ summary: 'Get progress for the current student' })
   @ApiResponse({ status: 200, description: 'Student progress data' })
-  async getStudentProgress(@Request() req) {
+  async getStudentProgress(@Request() req: any) {
     const studentId = req.user.id;
     return this.progressService.getStudentProgress(studentId);
   }

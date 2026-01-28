@@ -8,5 +8,5 @@ export class CreateOrganizationDto {
   })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 }

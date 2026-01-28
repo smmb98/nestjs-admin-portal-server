@@ -74,7 +74,7 @@ async function generatePostmanCollection(env) {
         const outputPath = path.join(
           __dirname,
           '..',
-          `ilmi-admin-portal-${env.name}.postman_collection.json`,
+          `ilmi-admin-portal-server-${env.name}.postman_collection.json`,
         );
         fs.writeFileSync(
           outputPath,

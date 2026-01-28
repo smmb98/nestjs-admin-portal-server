@@ -8,11 +8,19 @@ import { User } from '../entities/User';
 export class DevicesService {
   constructor(private readonly em: EntityManager) {}
 
-  async registerDevice(student: User, deviceUuid: string, deviceType: string): Promise<void> {
+  async registerDevice(
+    student: User,
+    deviceUuid: string,
+    deviceType: string,
+  ): Promise<void> {
     // Check if student already has an active device
-    const existingDeviceAccount = await this.em.findOne(DeviceAccount, { student });
+    const existingDeviceAccount = await this.em.findOne(DeviceAccount, {
+      student,
+    });
     if (existingDeviceAccount) {
-      throw new BadRequestException('Student already has an active device registered');
+      throw new BadRequestException(
+        'Student already has an active device registered',
+      );
     }
 
     // Find or create device
@@ -28,7 +36,9 @@ export class DevicesService {
     // Check max 5 accounts per device
     const deviceAccountsCount = await this.em.count(DeviceAccount, { device });
     if (deviceAccountsCount >= 5) {
-      throw new BadRequestException('Device has reached maximum number of accounts (5)');
+      throw new BadRequestException(
+        'Device has reached maximum number of accounts (5)',
+      );
     }
 
     // Create device account

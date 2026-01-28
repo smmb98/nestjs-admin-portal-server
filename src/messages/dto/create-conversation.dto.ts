@@ -9,5 +9,5 @@ export class CreateConversationDto {
   })
   @IsArray()
   @IsInt({ each: true })
-  participantIds: number[];
+  participantIds!: number[];
 }

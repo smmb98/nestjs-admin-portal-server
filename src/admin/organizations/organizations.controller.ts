@@ -9,7 +9,13 @@ import {
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
@@ -27,7 +33,10 @@ export class OrganizationsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new organization' })
-  @ApiResponse({ status: 201, description: 'Organization created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Organization created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   create(@Body() createOrganizationDto: CreateOrganizationDto) {
     return this.organizationsService.create(createOrganizationDto);
@@ -43,7 +52,10 @@ export class OrganizationsController {
   @Patch(':id/suspend')
   @ApiOperation({ summary: 'Update organization status' })
   @ApiParam({ name: 'id', type: 'number', description: 'Organization ID' })
-  @ApiResponse({ status: 200, description: 'Organization updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Organization updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Organization not found' })
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -55,7 +67,10 @@ export class OrganizationsController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete an organization' })
   @ApiParam({ name: 'id', type: 'number', description: 'Organization ID' })
-  @ApiResponse({ status: 200, description: 'Organization deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Organization deleted successfully',
+  })
   @ApiResponse({ status: 404, description: 'Organization not found' })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.organizationsService.remove(id);
