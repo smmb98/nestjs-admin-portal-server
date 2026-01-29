@@ -15,14 +15,11 @@ services:
       - PORT=3000
     depends_on:
       - db
-    volumes:
-      - .:/app
-      - /app/node_modules
     networks:
       - ilmi-network
 
   db:
-    image: postgres:latest
+    image: postgres:17
     environment:
       - POSTGRES_DB=ilmi_admin_portal
       - POSTGRES_USER=ilmi_user
