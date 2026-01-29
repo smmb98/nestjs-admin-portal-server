@@ -1,12 +1,14 @@
 services:
-  app:
+  app-dev:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        MODE: development
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - DATABASE_URL=postgresql://ilmi_user:ilmi_password@db:5432/ilmi_admin_portal
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-here-change-in-production}
       - JWT_EXPIRES_IN=1h
@@ -21,6 +23,28 @@ services:
     networks:
       - ilmi-network
 
+  app-prod:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODE: production
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://ilmi_user:ilmi_password@db:5432/ilmi_admin_portal
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-here-change-in-production}
+      - JWT_EXPIRES_IN=1h
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_your_stripe_secret_key_here}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_your_webhook_secret_here}
+      - PORT=3000
+    depends_on:
+      - db
+    networks:
+      - ilmi-network
+
   db:
     image: postgres:latest
     environment:
@@ -30,7 +54,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     networks:
       - ilmi-network
 
