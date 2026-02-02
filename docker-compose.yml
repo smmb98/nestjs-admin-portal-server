@@ -46,7 +46,7 @@ services:
       - ilmi-network
 
   db:
-    image: postgres:latest
+    image: postgres:17
     environment:
       - POSTGRES_DB=ilmi_admin_portal
       - POSTGRES_USER=ilmi_user
