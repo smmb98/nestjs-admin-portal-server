@@ -58,7 +58,9 @@ export class SubscriptionsService {
         endpointSecret!,
       );
     } catch (err) {
-      throw new Error(`Webhook signature verification failed: ${err instanceof Error ? err.message : String(err)}`);
+      throw new Error(
+        `Webhook signature verification failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
 
     if (event.type === 'payment_intent.succeeded') {

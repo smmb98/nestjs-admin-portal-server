@@ -1,13 +1,23 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
   "compilerOptions": {
+    /* Base Configuration */
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+
+    /* Path Mapping */
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+
+    /* Decorators (NestJS requirement) */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* JSX (for React components if any) */
+    "jsx": "react-jsx"
   }
 }

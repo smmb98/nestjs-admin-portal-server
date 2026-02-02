@@ -1,16 +1,20 @@
 import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
-import type { Request } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import type { FastifyRequest } from 'fastify';
 import { SubscriptionsService } from './subscriptions.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+
+interface FastifyRequestWithRawBody extends FastifyRequest {
+  rawBody: Buffer;
+}
 
 @ApiTags('subscriptions')
 @ApiBearerAuth('JWT-auth')
@@ -42,9 +46,9 @@ export class PaymentsController {
   @Post('stripe/webhook')
   @ApiOperation({ summary: 'Handle Stripe webhook' })
   @ApiResponse({ status: 200, description: 'Webhook received' })
-  async handleStripeWebhook(@Req() req: Request) {
-    const signature = req.headers.get('stripe-signature') as string;
-    const rawBody = (req as any).rawBody as Buffer;
+  async handleStripeWebhook(@Req() req: FastifyRequestWithRawBody) {
+    const signature = req.headers['stripe-signature'] as string;
+    const rawBody = req.rawBody;
     await this.subscriptionsService.handleStripeWebhook(rawBody, signature);
     return { received: true };
   }
