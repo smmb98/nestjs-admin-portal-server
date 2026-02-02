@@ -1,3 +1,15 @@
+/**
+ * Base TypeScript Configuration
+ * 
+ * This is the root configuration file that serves as the base for all other
+ * TypeScript configurations in this project. It contains shared compiler options
+ * that are common across development, build, and tooling environments.
+ * 
+ * Other configs extend this file:
+ * - tsconfig.app.json (development type-checking)
+ * - tsconfig.build.json (production build)
+ * - tsconfig.node.json (Vite tooling)
+ */
 {
   "compilerOptions": {
     /* Base Configuration */

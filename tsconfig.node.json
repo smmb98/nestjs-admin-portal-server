@@ -1,3 +1,19 @@
+/**
+ * Node/Vite TypeScript Configuration
+ *
+ * This configuration is used for Vite tooling and Node.js-specific files
+ * (like vite.config.ts). It extends the base configuration with settings
+ * optimized for Node.js environments and bundler compatibility.
+ *
+ * Used by:
+ * - Vite build tool for its configuration file
+ * - Node.js tooling scripts
+ *
+ * Features:
+ * - ES2023 target for modern Node.js features
+ * - Bundler module resolution for Vite compatibility
+ * - Linting rules for config file validation
+ */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {

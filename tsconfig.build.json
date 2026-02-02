@@ -1,3 +1,23 @@
+/**
+ * Build TypeScript Configuration (Production)
+ *
+ * This configuration is used for compiling the application for production.
+ * It extends the base configuration with output settings optimized for
+ * deployment. Unlike development configs, this does NOT include linting
+ * rules - it focuses purely on compilation.
+ *
+ * Used by:
+ * - Nest CLI (`nest build`) - referenced in nest-cli.json
+ * - Production builds and Docker deployments
+ * - CI/CD pipelines
+ *
+ * Features:
+ * - NO linting rules (build should not fail on style issues)
+ * - Emits compiled JavaScript to ./dist
+ * - Generates declaration files (.d.ts)
+ * - CommonJS module format for Node.js compatibility
+ * - Strips comments for smaller output
+ */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {

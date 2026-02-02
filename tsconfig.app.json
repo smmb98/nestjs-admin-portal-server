@@ -1,3 +1,20 @@
+/**
+ * Application TypeScript Configuration (Development)
+ *
+ * This configuration is used for development type-checking and IDE support.
+ * It extends the base configuration and adds strict linting rules to catch
+ * errors during development.
+ *
+ * Used by:
+ * - IDEs (VSCode, WebStorm) for type checking and IntelliSense
+ * - Running `tsc --noEmit` to validate code without building
+ * - Development workflow to catch type errors early
+ *
+ * Features:
+ * - Strict type checking enabled
+ * - Linting rules (noUnusedLocals, noUnusedParameters, etc.)
+ * - No emit (type-checking only)
+ */
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
