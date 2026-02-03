@@ -1,5 +1,8 @@
+version: "3.9"
+
 services:
   app-dev:
+    profiles: ["dev"]
     build:
       context: .
       dockerfile: Dockerfile
@@ -31,7 +34,7 @@ services:
       args:
         MODE: production
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://ilmi_user:ilmi_password@db:5432/ilmi_admin_portal
@@ -46,15 +49,14 @@ services:
       - ilmi-network
 
   db:
+    profiles: ["dev", "prod"]
     image: postgres:17
     environment:
-      - POSTGRES_DB=ilmi_admin_portal
-      - POSTGRES_USER=ilmi_user
-      - POSTGRES_PASSWORD=ilmi_password
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ilmi_admin_portal
+      POSTGRES_USER: ilmi_user
+      POSTGRES_PASSWORD: ilmi_password
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - ilmi-network
 

@@ -1,16 +1,53 @@
+# Dependencies
 node_modules
 npm-debug.log
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Docker
 Dockerfile*
 docker-compose*
 .dockerignore
-.git
-.gitignore
+
+# Documentation
 README.md
+*.md
+
+# Environment
 .env
-.nyc_output
+.env.local
+.env.*.local
+
+# Testing
 coverage
+.nyc_output
 .coverage
-.eslintrc.js
-.prettierrc
-.prettierignore
+test
+
+# IDE and Editor
+*.sublime-*
+*.sublime-workspace
+*.sublime-project
+
+# Build artifacts
+dist
+
+# API Documentation
 *.postman_collection.json
+scripts
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
