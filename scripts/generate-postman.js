@@ -155,6 +155,138 @@ function fixBearerTokenVariable(collection) {
   replaceInObject(collection);
 }
 
+// Request-level test scripts for auth endpoints
+const AUTH_LOGIN_TEST = `
+if (pm.response.code === 200 || pm.response.code === 201) {
+  const data = pm.response.json();
+  pm.environment.set('accessToken', data.accessToken);
+  if (data.refreshToken) pm.environment.set('refreshToken', data.refreshToken);
+  pm.environment.set('tokenExpiry', Math.floor(Date.now() / 1000) + 3600);
+  // Save user email from response
+  if (data.user && data.user.email) {
+    pm.environment.set('testEmail', data.user.email);
+    console.log('✅ User email saved from login response');
+  }
+  // Extract password from request body and save to testPassword
+  try {
+    const body = pm.request.body.raw;
+    if (body) {
+      const parsedBody = JSON.parse(body);
+      if (parsedBody.password) {
+        pm.environment.set('testPassword', parsedBody.password);
+        console.log('✅ Password saved from request body');
+      }
+    }
+  } catch (e) {
+    console.log('Could not extract password from request body');
+  }
+  console.log('✅ Tokens saved from login response');
+}
+`;
+
+const AUTH_REFRESH_TEST = `
+if (pm.response.code === 200 || pm.response.code === 201) {
+  const data = pm.response.json();
+  pm.environment.set('accessToken', data.accessToken);
+  if (data.refreshToken) pm.environment.set('refreshToken', data.refreshToken);
+  pm.environment.set('tokenExpiry', Math.floor(Date.now() / 1000) + 3600);
+  // Save user email if returned
+  // if (data.user && data.user.email) {
+  //   pm.environment.set('testEmail', data.user.email);
+  //   console.log('✅ User email saved from refresh response');
+  // }
+  console.log('✅ Tokens saved from refresh response');
+}
+`;
+
+const AUTH_LOGOUT_TEST = `
+pm.environment.unset('accessToken');
+pm.environment.unset('refreshToken');
+pm.environment.unset('tokenExpiry');
+console.log('✅ Tokens cleared on logout');
+`;
+
+function addAuthScripts(collection) {
+  function traverseItems(items) {
+    if (!items || !Array.isArray(items)) return;
+
+    for (const item of items) {
+      // Check if this item is a request
+      if (item.request && item.request.url && item.request.url.path) {
+        const path = item.request.url.path;
+        const method = item.request.method?.toUpperCase();
+
+        // Match auth/login POST
+        if (
+          path.includes('auth') &&
+          path.includes('login') &&
+          method === 'POST'
+        ) {
+          item.event = item.event || [];
+          item.event.push({
+            listen: 'test',
+            script: {
+              type: 'text/javascript',
+              exec: AUTH_LOGIN_TEST.split('\n'),
+            },
+          });
+          // console.log(
+          //   '✅ Added login test script to:',
+          //   item.name || path.join('/'),
+          // );
+        }
+
+        // Match auth/refresh POST
+        if (
+          path.includes('auth') &&
+          path.includes('refresh') &&
+          method === 'POST'
+        ) {
+          item.event = item.event || [];
+          item.event.push({
+            listen: 'test',
+            script: {
+              type: 'text/javascript',
+              exec: AUTH_REFRESH_TEST.split('\n'),
+            },
+          });
+          // console.log(
+          //   '✅ Added refresh test script to:',
+          //   item.name || path.join('/'),
+          // );
+        }
+
+        // Match auth/logout POST
+        if (
+          path.includes('auth') &&
+          path.includes('logout') &&
+          method === 'POST'
+        ) {
+          item.event = item.event || [];
+          item.event.push({
+            listen: 'test',
+            script: {
+              type: 'text/javascript',
+              exec: AUTH_LOGOUT_TEST.split('\n'),
+            },
+          });
+          // console.log(
+          //   '✅ Added logout test script to:',
+          //   item.name || path.join('/'),
+          // );
+        }
+      }
+
+      // Recursively check nested items (folders)
+      if (item.item) {
+        traverseItems(item.item);
+      }
+    }
+  }
+
+  traverseItems(collection.item);
+}
+
 function generateEnvironmentJson(env) {
   const timestamp = new Date().toISOString();
   return {
@@ -253,6 +385,16 @@ async function generatePostmanCollection() {
 
         // Fix token variable name mismatch: replace {{bearerToken}} with {{accessToken}}
         fixBearerTokenVariable(collection);
+
+        // Add request-level test scripts for auth endpoints
+        addAuthScripts(collection);
+
+        // Remove baseUrl from collection variables (use environment variable instead)
+        if (collection.variable) {
+          collection.variable = collection.variable.filter(
+            (v) => v.key !== 'baseUrl',
+          );
+        }
 
         collection.event = [
           {

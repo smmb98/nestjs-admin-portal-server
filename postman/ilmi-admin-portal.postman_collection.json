@@ -1,7 +1,7 @@
 {
   "item": [
     {
-      "id": "172d4541-6ff7-4082-a914-e3779d7b7caf",
+      "id": "c5be2b3c-8f9a-4d97-b145-97b61dec933e",
       "name": "App",
       "description": {
         "content": "",
@@ -9,7 +9,7 @@
       },
       "item": [
         {
-          "id": "e41e175e-b169-4bc1-8773-bd2411cfbcd5",
+          "id": "b382daa2-3ee9-4156-9cb9-aa8a8e1ae741",
           "name": "App Controller get Hello",
           "request": {
             "name": "App Controller get Hello",
@@ -29,7 +29,7 @@
           },
           "response": [
             {
-              "id": "8e127203-00da-4487-965a-7cda2e7694f0",
+              "id": "2203c4a5-3607-41ba-8d0e-6c18e2e47823",
               "originalRequest": {
                 "url": {
                   "path": [
@@ -66,7 +66,7 @@
       "event": []
     },
     {
-      "id": "b95006e8-a570-4b98-bed6-c0301154abf5",
+      "id": "b45f6177-545a-4b3c-8dab-10228a6a3eb2",
       "name": "Authentication",
       "description": {
         "content": "",
@@ -74,7 +74,7 @@
       },
       "item": [
         {
-          "id": "d46af36e-2808-460f-b36e-3b6962bbd7a2",
+          "id": "52d602f1-c9ca-4572-837f-69c4bd5be0d3",
           "name": "User authentication",
           "request": {
             "name": "User authentication",
@@ -117,7 +117,7 @@
           },
           "response": [
             {
-              "id": "e0b0e0f0-6b7e-4507-bbb6-fa9284e10c64",
+              "id": "9b778189-6654-4d9b-96f7-4f86339c4df5",
               "name": "Successfully authenticated",
               "originalRequest": {
                 "url": {
@@ -161,7 +161,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "398f2e58-d20b-4647-a4e2-d75a472c0d41",
+              "id": "dcc5955b-ebb0-478a-85ad-a7afe3983e4d",
               "name": "Invalid credentials",
               "originalRequest": {
                 "url": {
@@ -199,7 +199,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "59d65aa8-effd-4d67-9600-aa7a61d54f0a",
+              "id": "dd467dc3-a976-4cd1-8446-f594d80043aa",
               "name": "Too many requests",
               "originalRequest": {
                 "url": {
@@ -237,13 +237,49 @@
               "_postman_previewlanguage": "text"
             }
           ],
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  pm.environment.set('accessToken', data.accessToken);",
+                  "  if (data.refreshToken) pm.environment.set('refreshToken', data.refreshToken);",
+                  "  pm.environment.set('tokenExpiry', Math.floor(Date.now() / 1000) + 3600);",
+                  "  // Save user email from response",
+                  "  if (data.user && data.user.email) {",
+                  "    pm.environment.set('testEmail', data.user.email);",
+                  "    console.log('✅ User email saved from login response');",
+                  "  }",
+                  "  // Extract password from request body and save to testPassword",
+                  "  try {",
+                  "    const body = pm.request.body.raw;",
+                  "    if (body) {",
+                  "      const parsedBody = JSON.parse(body);",
+                  "      if (parsedBody.password) {",
+                  "        pm.environment.set('testPassword', parsedBody.password);",
+                  "        console.log('✅ Password saved from request body');",
+                  "      }",
+                  "    }",
+                  "  } catch (e) {",
+                  "    console.log('Could not extract password from request body');",
+                  "  }",
+                  "  console.log('✅ Tokens saved from login response');",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           }
         },
         {
-          "id": "54ea1ad0-12e4-4101-b541-b1520f1c2da8",
+          "id": "a4c0192d-1c9e-4530-aaa1-a1800b92d1ae",
           "name": "Refresh access token",
           "request": {
             "name": "Refresh access token",
@@ -286,7 +322,7 @@
           },
           "response": [
             {
-              "id": "f0ce59aa-84eb-44a9-8bb7-639c53943395",
+              "id": "f0c09f54-63c0-4012-9b18-7c5431b7d98c",
               "name": "Tokens refreshed successfully",
               "originalRequest": {
                 "url": {
@@ -330,7 +366,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "8481dd57-b0d1-4161-8219-45d9a6ce4066",
+              "id": "cd57c290-dc14-4123-a5c2-cdd360ec4b24",
               "name": "Invalid or expired refresh token",
               "originalRequest": {
                 "url": {
@@ -368,13 +404,36 @@
               "_postman_previewlanguage": "text"
             }
           ],
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  pm.environment.set('accessToken', data.accessToken);",
+                  "  if (data.refreshToken) pm.environment.set('refreshToken', data.refreshToken);",
+                  "  pm.environment.set('tokenExpiry', Math.floor(Date.now() / 1000) + 3600);",
+                  "  // Save user email if returned",
+                  "  // if (data.user && data.user.email) {",
+                  "  //   pm.environment.set('testEmail', data.user.email);",
+                  "  //   console.log('✅ User email saved from refresh response');",
+                  "  // }",
+                  "  console.log('✅ Tokens saved from refresh response');",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           }
         },
         {
-          "id": "14523150-2b0c-4207-a366-614c1fcbbfc3",
+          "id": "fd787680-2ea6-49fd-bf96-42f9c3bdcb28",
           "name": "User logout",
           "request": {
             "name": "User logout",
@@ -412,7 +471,7 @@
           },
           "response": [
             {
-              "id": "32e7ea26-a08d-4b83-8c91-09d2b012f3e0",
+              "id": "f8433edc-1a00-4c1d-8c3a-b79cb1c4ab96",
               "name": "Logged out successfully",
               "originalRequest": {
                 "url": {
@@ -458,7 +517,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "53f504ec-311c-47b7-9c4d-820e0d55c683",
+              "id": "bfb1d3c7-59ad-4d64-bb67-486b90d3c930",
               "name": "Unauthorized",
               "originalRequest": {
                 "url": {
@@ -504,7 +563,22 @@
               "_postman_previewlanguage": "text"
             }
           ],
-          "event": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "",
+                  "pm.environment.unset('accessToken');",
+                  "pm.environment.unset('refreshToken');",
+                  "pm.environment.unset('tokenExpiry');",
+                  "console.log('✅ Tokens cleared on logout');",
+                  ""
+                ]
+              }
+            }
+          ],
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           }
@@ -513,7 +587,7 @@
       "event": []
     },
     {
-      "id": "f576d646-eab5-4713-a9ca-f00a9b261886",
+      "id": "699c11b4-83e2-4a63-ae50-d18e62d6ab5d",
       "name": "organizations",
       "description": {
         "content": "",
@@ -521,7 +595,7 @@
       },
       "item": [
         {
-          "id": "94d81f9a-8e17-4f77-967a-d3a98ed56b30",
+          "id": "1e6a87ed-c0e7-4f83-8bba-2975e2860100",
           "name": "Create a new organization",
           "request": {
             "name": "Create a new organization",
@@ -565,7 +639,7 @@
           },
           "response": [
             {
-              "id": "e2669e05-9c96-47d8-9de7-da507391f306",
+              "id": "0c3b25c9-97b2-4898-b8fb-6e170201c512",
               "name": "Organization created successfully",
               "originalRequest": {
                 "url": {
@@ -613,7 +687,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "2f6e1eeb-c371-4b46-a154-3fe33493e02b",
+              "id": "3576a7bd-a724-432d-bcbe-8fe40990f826",
               "name": "Bad request",
               "originalRequest": {
                 "url": {
@@ -667,7 +741,7 @@
           }
         },
         {
-          "id": "56a3d84a-d88c-44c1-a8cf-77e857740f83",
+          "id": "aac635b4-9838-40a3-a8c2-7fbf08e5a897",
           "name": "Get all organizations",
           "request": {
             "name": "Get all organizations",
@@ -696,7 +770,7 @@
           },
           "response": [
             {
-              "id": "9d900106-3b9f-46db-8958-862c0e1108ae",
+              "id": "713f6572-1a4c-4242-b9e9-a19a657b079c",
               "name": "List of organizations",
               "originalRequest": {
                 "url": {
@@ -742,7 +816,7 @@
           }
         },
         {
-          "id": "268cc91b-8ac0-4c5e-9ace-f4d6ea4021df",
+          "id": "28bdc782-ce5e-4e61-95c6-e18d3a1c1ad6",
           "name": "Update organization status",
           "request": {
             "name": "Update organization status",
@@ -796,7 +870,7 @@
           },
           "response": [
             {
-              "id": "0381fcc1-30cb-43d8-9121-284e5dfbf087",
+              "id": "9eafc90b-becc-4da1-af56-b0eb4a43b255",
               "name": "Organization updated successfully",
               "originalRequest": {
                 "url": {
@@ -854,7 +928,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "78283f25-1988-4a0d-942b-b70a3bd3b5c1",
+              "id": "e4d06437-ece7-4a4b-abd5-83a352f905ba",
               "name": "Organization not found",
               "originalRequest": {
                 "url": {
@@ -918,7 +992,7 @@
           }
         },
         {
-          "id": "306a92a5-1954-4fe2-b8f6-5e5c631a37d4",
+          "id": "41298be5-7579-4a79-8078-3f9c8903df8a",
           "name": "Delete an organization",
           "request": {
             "name": "Delete an organization",
@@ -956,7 +1030,7 @@
           },
           "response": [
             {
-              "id": "1962e1ad-c9a0-4177-85ac-73eade6dddde",
+              "id": "078a7bf4-aae5-4456-96a2-01490be710f5",
               "name": "Organization deleted successfully",
               "originalRequest": {
                 "url": {
@@ -1005,7 +1079,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "e1d60576-0bd6-4eb7-9624-9abd2a8a09ab",
+              "id": "61af84f5-1918-42a6-8852-55c73b278e5d",
               "name": "Organization not found",
               "originalRequest": {
                 "url": {
@@ -1063,7 +1137,7 @@
       "event": []
     },
     {
-      "id": "fd839503-d922-46e3-af36-76058555075e",
+      "id": "13d690f0-a989-44d6-97f7-70dc20babcd2",
       "name": "Licenses",
       "description": {
         "content": "",
@@ -1071,7 +1145,7 @@
       },
       "item": [
         {
-          "id": "99be32b6-1843-4d44-ba9d-b3c7860f5cda",
+          "id": "5daf4c4b-fd40-435b-b362-8c30f64fad6c",
           "name": "Licenses Controller bulk Create",
           "request": {
             "name": "Licenses Controller bulk Create",
@@ -1108,7 +1182,7 @@
           },
           "response": [
             {
-              "id": "34ccc649-60f4-4ef5-9899-43ea9fed6a2a",
+              "id": "b8443979-e02b-485e-8d36-ea2990bb8683",
               "originalRequest": {
                 "url": {
                   "path": [
@@ -1152,7 +1226,7 @@
           }
         },
         {
-          "id": "c0fdd6c8-e87e-46d7-b9d0-cbed849d0ccc",
+          "id": "2b8f2515-6285-4711-8f3f-0295bb2d61e6",
           "name": "Licenses Controller find All",
           "request": {
             "name": "Licenses Controller find All",
@@ -1173,7 +1247,7 @@
           },
           "response": [
             {
-              "id": "7d498039-3b45-4a70-a58e-19518e4dca9f",
+              "id": "0f21ae1e-2f56-4719-88e2-91bc6a016f21",
               "originalRequest": {
                 "url": {
                   "path": [
@@ -1208,7 +1282,7 @@
           }
         },
         {
-          "id": "e4079a7d-1497-40fa-aa99-7c84bcc0542b",
+          "id": "822afb7f-dd4c-4538-a99b-3b6e2939e573",
           "name": "Licenses Controller suspend",
           "request": {
             "name": "Licenses Controller suspend",
@@ -1239,7 +1313,7 @@
           },
           "response": [
             {
-              "id": "00e453b0-df4e-4696-ab9c-df346ba674f6",
+              "id": "878ff41a-2aed-4b1b-871f-bb11f1c49a97",
               "originalRequest": {
                 "url": {
                   "path": [
@@ -1284,7 +1358,7 @@
           }
         },
         {
-          "id": "e5df5bdf-5fb3-4b3e-8b67-dd58c001a381",
+          "id": "85c898b9-81fa-46b7-868d-619b2ea9d98e",
           "name": "Licenses Controller revoke",
           "request": {
             "name": "Licenses Controller revoke",
@@ -1315,7 +1389,7 @@
           },
           "response": [
             {
-              "id": "05f2a5e8-ed17-4a90-92ad-79ef674d7046",
+              "id": "49a3a7b7-1a9e-4d4d-8bcf-2adae850fb96",
               "originalRequest": {
                 "url": {
                   "path": [
@@ -1363,7 +1437,7 @@
       "event": []
     },
     {
-      "id": "d6245bf2-c177-4357-85af-673975439c49",
+      "id": "4befb515-6ae8-4d0f-b8d0-80b9cf2ff049",
       "name": "students",
       "description": {
         "content": "",
@@ -1371,7 +1445,7 @@
       },
       "item": [
         {
-          "id": "256b2f33-5211-483e-ae4b-a1c5ac7946ee",
+          "id": "38b3d15b-fb65-4d74-91d7-a4bf4b905d85",
           "name": "Create a new student",
           "request": {
             "name": "Create a new student",
@@ -1415,7 +1489,7 @@
           },
           "response": [
             {
-              "id": "bfb2a118-7df6-4c51-874e-d0bddc102b4b",
+              "id": "fabe2a43-7b89-428f-a4a7-973cb46b0c36",
               "name": "Student created successfully",
               "originalRequest": {
                 "url": {
@@ -1463,7 +1537,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "3042d87e-e898-458b-8e7c-1407953c0eaf",
+              "id": "cc18ff6e-d257-4caa-85dc-211c5783aeed",
               "name": "Bad request",
               "originalRequest": {
                 "url": {
@@ -1517,7 +1591,7 @@
           }
         },
         {
-          "id": "26b94d2d-7878-4257-98cd-20ddab88c567",
+          "id": "033af3cb-b3d4-44df-950b-3df4e690711d",
           "name": "Get all students for the organization",
           "request": {
             "name": "Get all students for the organization",
@@ -1546,7 +1620,7 @@
           },
           "response": [
             {
-              "id": "14479604-22b9-4283-a6fb-18382ca22915",
+              "id": "4ded9179-02ea-46e9-938a-9c0eb1d1d68b",
               "name": "List of students",
               "originalRequest": {
                 "url": {
@@ -1592,7 +1666,7 @@
           }
         },
         {
-          "id": "faae099e-5467-4c71-89c0-ea5a6315a256",
+          "id": "f1029e24-1d61-402c-a23d-196e921884db",
           "name": "Update a student",
           "request": {
             "name": "Update a student",
@@ -1645,7 +1719,7 @@
           },
           "response": [
             {
-              "id": "ab999179-d86a-47c4-b138-1de0d7379dfc",
+              "id": "079e6ced-eeba-4c71-9cf4-6b0f7b7fcc27",
               "name": "Student updated successfully",
               "originalRequest": {
                 "url": {
@@ -1702,7 +1776,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "864ab6f2-38e7-489d-9657-8b325b0b5936",
+              "id": "b3de7d9d-7c90-4b06-92c2-a4154b48490e",
               "name": "Student not found",
               "originalRequest": {
                 "url": {
@@ -1765,7 +1839,7 @@
           }
         },
         {
-          "id": "dd02ffb5-45c3-48a2-bb5a-fe4f6733c673",
+          "id": "7785e86e-90df-4ff6-a05c-89c9b8574876",
           "name": "Delete a student",
           "request": {
             "name": "Delete a student",
@@ -1803,7 +1877,7 @@
           },
           "response": [
             {
-              "id": "164bdd25-02fe-4801-9821-6f795ba8bd05",
+              "id": "bb714a60-155a-4792-a429-7a0d60f101e7",
               "name": "Student deleted successfully",
               "originalRequest": {
                 "url": {
@@ -1852,7 +1926,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "eb8bd394-e5e7-4ca9-8da3-f2c68d3db855",
+              "id": "0002352e-1a96-4c78-8cd3-bf671cb56cd1",
               "name": "Student not found",
               "originalRequest": {
                 "url": {
@@ -1907,7 +1981,7 @@
           }
         },
         {
-          "id": "d54fdde4-2057-470e-96b7-ac90ee85ab28",
+          "id": "616d248d-3218-40dd-b0d8-3b53872dc198",
           "name": "Suspend a student",
           "request": {
             "name": "Suspend a student",
@@ -1946,7 +2020,7 @@
           },
           "response": [
             {
-              "id": "f05f1f76-a0a8-4931-a61f-bb02aaaec3be",
+              "id": "bafbb075-2a25-41df-bb24-4265c0a9fde3",
               "name": "Student suspended successfully",
               "originalRequest": {
                 "url": {
@@ -1996,7 +2070,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "dc8d3e5d-1cf5-414d-8793-9acf0daccd47",
+              "id": "e4d6e2a0-f558-42bd-8f9b-85900016ae2c",
               "name": "Student not found",
               "originalRequest": {
                 "url": {
@@ -2055,7 +2129,7 @@
       "event": []
     },
     {
-      "id": "f83d8b7c-df4b-4604-aaba-afd2a3e71880",
+      "id": "34c97186-9044-4795-9eda-5e24de19af3a",
       "name": "licenses",
       "description": {
         "content": "",
@@ -2063,7 +2137,7 @@
       },
       "item": [
         {
-          "id": "2e6853a0-5df7-40c0-899e-b7884bdad2d6",
+          "id": "353a68f4-eaa2-440a-852f-77621353296b",
           "name": "Assign a license to a student",
           "request": {
             "name": "Assign a license to a student",
@@ -2108,7 +2182,7 @@
           },
           "response": [
             {
-              "id": "46f3d40b-7340-442c-8f4a-aea76d87cd7c",
+              "id": "8e26f8fb-a081-4aab-bdee-c2b37405d687",
               "name": "License assigned successfully",
               "originalRequest": {
                 "url": {
@@ -2157,7 +2231,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "8bc8c9b9-58df-4881-891e-1af3adfc248b",
+              "id": "2a02a629-922b-4b5d-8f1d-45040ae15e55",
               "name": "Bad request",
               "originalRequest": {
                 "url": {
@@ -2212,7 +2286,7 @@
           }
         },
         {
-          "id": "350c4e1d-9252-405f-a08b-996aec0425a3",
+          "id": "30ef2f56-46b9-4c4f-a2d3-58e8265532a1",
           "name": "Revoke a license from a student",
           "request": {
             "name": "Revoke a license from a student",
@@ -2257,7 +2331,7 @@
           },
           "response": [
             {
-              "id": "9c2025a3-a940-4008-85fb-d7d9a40cc592",
+              "id": "d81baf56-123e-47cd-a08d-6e3b16f9ab9a",
               "name": "License revoked successfully",
               "originalRequest": {
                 "url": {
@@ -2306,7 +2380,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "dbeb918b-0e12-4d7a-8993-2cdb7db6d054",
+              "id": "c0bc98f7-f559-4147-baaf-763e4cdf9a60",
               "name": "Bad request",
               "originalRequest": {
                 "url": {
@@ -2364,7 +2438,7 @@
       "event": []
     },
     {
-      "id": "fdc19ae4-2046-4f3c-bc21-9c43ed25269f",
+      "id": "668878c7-df74-4717-b9e2-a76c707cdfdf",
       "name": "devices",
       "description": {
         "content": "",
@@ -2372,7 +2446,7 @@
       },
       "item": [
         {
-          "id": "3df8ed56-8a09-4c15-86fb-86721ef8781d",
+          "id": "b4e7179f-6479-4fa0-af35-e723949a0751",
           "name": "Register a device for the student",
           "request": {
             "name": "Register a device for the student",
@@ -2416,7 +2490,7 @@
           },
           "response": [
             {
-              "id": "75cc0ec3-5636-4285-9273-5853f4c889e9",
+              "id": "b3c6c6e3-d26a-4448-851c-5223a567d3af",
               "name": "Device registered successfully",
               "originalRequest": {
                 "url": {
@@ -2464,7 +2538,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "a4f59310-c229-48fd-bc9e-80a39f573aaa",
+              "id": "349fd7bd-d6a9-453b-b9a9-f460039c8f2c",
               "name": "Bad request",
               "originalRequest": {
                 "url": {
@@ -2518,7 +2592,7 @@
           }
         },
         {
-          "id": "61ec4079-24b6-49ec-9f7a-3c3cc7c8f978",
+          "id": "198fb28e-a6fa-4b4e-ace7-7c08ae5b563e",
           "name": "Unregister a device for the student",
           "request": {
             "name": "Unregister a device for the student",
@@ -2562,7 +2636,7 @@
           },
           "response": [
             {
-              "id": "17f99b73-1912-44de-8c12-f5266d8c5f6b",
+              "id": "2da8aef7-6185-4ffb-ae6e-62c3330af868",
               "name": "Device unregistered successfully",
               "originalRequest": {
                 "url": {
@@ -2610,7 +2684,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "4783b55e-acc6-4e69-808f-9350c794c8f1",
+              "id": "bbbbccf9-2dfd-41d0-9bda-9fcf2088bc59",
               "name": "Bad request",
               "originalRequest": {
                 "url": {
@@ -2667,7 +2741,7 @@
       "event": []
     },
     {
-      "id": "938ed327-ad1e-49f8-a4a2-5d144387a2c7",
+      "id": "ffe5f85d-4c5b-4038-9e44-d3b446e05eb4",
       "name": "progress",
       "description": {
         "content": "",
@@ -2675,7 +2749,7 @@
       },
       "item": [
         {
-          "id": "df030b8e-4343-49cb-8650-36afc5f7a1d3",
+          "id": "7a0a8c32-392d-43d5-82e2-77688452a4ea",
           "name": "Get progress for all students in the organization",
           "request": {
             "name": "Get progress for all students in the organization",
@@ -2705,7 +2779,7 @@
           },
           "response": [
             {
-              "id": "5c3e8702-f38f-4d57-92bf-5c9e7cc548e5",
+              "id": "2601a234-6b27-4f9b-8e18-30668347cb43",
               "name": "Students progress data",
               "originalRequest": {
                 "url": {
@@ -2752,7 +2826,7 @@
           }
         },
         {
-          "id": "d60fbb6b-6e93-4c58-b274-4e628fa29c56",
+          "id": "b0448af6-e9fe-4dd6-b414-74fe916480e1",
           "name": "Get progress summary for the organization",
           "request": {
             "name": "Get progress summary for the organization",
@@ -2782,7 +2856,7 @@
           },
           "response": [
             {
-              "id": "38c32908-df9e-4397-a4d3-e3a491ca6f97",
+              "id": "d5b795fe-e19d-4c0a-a348-29d56e9b4ce1",
               "name": "Organization progress summary",
               "originalRequest": {
                 "url": {
@@ -2829,7 +2903,7 @@
           }
         },
         {
-          "id": "16614206-397f-45dc-a33b-080234c42838",
+          "id": "a1877970-f064-47cd-a09a-c35bc892e9d9",
           "name": "Get progress for the current student",
           "request": {
             "name": "Get progress for the current student",
@@ -2858,7 +2932,7 @@
           },
           "response": [
             {
-              "id": "b8f5ed08-5c9c-4b39-b341-7b1263b68445",
+              "id": "aa409d5a-3652-4bbe-b682-a032b36fb83f",
               "name": "Student progress data",
               "originalRequest": {
                 "url": {
@@ -2907,7 +2981,7 @@
       "event": []
     },
     {
-      "id": "d56ff559-2db5-4c84-b1b6-4b686cc4c91f",
+      "id": "e72bd590-d8f3-408c-b1f8-cda06eab0cac",
       "name": "messages",
       "description": {
         "content": "",
@@ -2915,7 +2989,7 @@
       },
       "item": [
         {
-          "id": "c8423457-4624-4748-b3f6-96763c253327",
+          "id": "485ccc98-9e74-4544-80b3-854afc7453fa",
           "name": "Create a new conversation",
           "request": {
             "name": "Create a new conversation",
@@ -2959,7 +3033,7 @@
           },
           "response": [
             {
-              "id": "ef3f2bfa-3ce8-4395-9f10-8c85ef143d8b",
+              "id": "83e32dee-4704-45a0-8206-943c0c149d90",
               "name": "Conversation created successfully",
               "originalRequest": {
                 "url": {
@@ -3007,7 +3081,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "2282272e-90ab-4fe2-bae4-d594d03ca624",
+              "id": "0bd94929-eb76-4bf5-a343-87d039a9dcea",
               "name": "Bad request",
               "originalRequest": {
                 "url": {
@@ -3061,7 +3135,7 @@
           }
         },
         {
-          "id": "6a67defd-16ec-4e5e-afc7-395e7ca3e785",
+          "id": "c496622b-ae00-4cf4-b294-6ab5dadb4bca",
           "name": "Get user conversations",
           "request": {
             "name": "Get user conversations",
@@ -3090,7 +3164,7 @@
           },
           "response": [
             {
-              "id": "6e08e760-2c87-4e0e-af49-aaa4e5c6c40a",
+              "id": "d7f4a133-b312-4043-ab29-3f10475f3169",
               "name": "List of conversations",
               "originalRequest": {
                 "url": {
@@ -3136,7 +3210,7 @@
           }
         },
         {
-          "id": "f4d4b113-a870-4e42-9fe9-2a24018fef62",
+          "id": "cdb10de8-b84c-45f3-831d-51e1b0d6123d",
           "name": "Send a message",
           "request": {
             "name": "Send a message",
@@ -3180,7 +3254,7 @@
           },
           "response": [
             {
-              "id": "968e379c-6053-48ba-a6ef-f97097410ee2",
+              "id": "967c0d51-3348-4ade-a5e9-66a63e584285",
               "name": "Message sent successfully",
               "originalRequest": {
                 "url": {
@@ -3228,7 +3302,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "0d1a86e0-0a43-40b6-a93e-e6f96eb8ed00",
+              "id": "ae73ace4-7f9b-4c2d-ad0b-a609128313b0",
               "name": "Bad request",
               "originalRequest": {
                 "url": {
@@ -3285,7 +3359,7 @@
       "event": []
     },
     {
-      "id": "d3d5ae0b-d742-4a8c-affc-cfe5de8f21b9",
+      "id": "21e6e02e-fc6e-46e9-ab96-271036344034",
       "name": "subscriptions",
       "description": {
         "content": "",
@@ -3293,7 +3367,7 @@
       },
       "item": [
         {
-          "id": "57ca8d82-f771-424a-8389-57964335c052",
+          "id": "70e71e05-f854-4cd2-9369-bb7980f4c0cd",
           "name": "Create a new subscription",
           "request": {
             "name": "Create a new subscription",
@@ -3336,7 +3410,7 @@
           },
           "response": [
             {
-              "id": "1d369c44-1f3d-4c63-8fe8-e92fc844be93",
+              "id": "03c89ced-ff7c-42b3-86f5-22fc9166371a",
               "name": "Subscription created successfully",
               "originalRequest": {
                 "url": {
@@ -3383,7 +3457,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "da7d7798-c86e-43b7-afab-e52c85872889",
+              "id": "01f0c8c6-1163-4f9a-a8c6-7f5b2d642c2a",
               "name": "Bad request",
               "originalRequest": {
                 "url": {
@@ -3439,7 +3513,7 @@
       "event": []
     },
     {
-      "id": "7b1f8f53-cf9a-4ca2-8fed-4a5df98bd286",
+      "id": "69acdafc-fc9f-45d4-b2ad-3a59175eb629",
       "name": "payments",
       "description": {
         "content": "",
@@ -3447,7 +3521,7 @@
       },
       "item": [
         {
-          "id": "28007e93-1733-49ec-b168-8dcdc97a6b24",
+          "id": "bb92087a-4d64-40a4-87f8-40c063023526",
           "name": "Handle Stripe webhook",
           "request": {
             "name": "Handle Stripe webhook",
@@ -3469,7 +3543,7 @@
           },
           "response": [
             {
-              "id": "e3acbc4c-fd91-47a3-a9de-8243300c50ab",
+              "id": "40d97abc-1ce2-4ad6-8083-7ea5f2f8c92a",
               "name": "Webhook received",
               "originalRequest": {
                 "url": {
@@ -3506,7 +3580,7 @@
           }
         },
         {
-          "id": "f7f6e269-ece2-45d5-9c98-866908ade954",
+          "id": "ae32301a-e650-42c7-85df-aaac6ff1b188",
           "name": "Handle HBL payment callback",
           "request": {
             "name": "Handle HBL payment callback",
@@ -3528,7 +3602,7 @@
           },
           "response": [
             {
-              "id": "743f40fa-0e4e-4757-b24c-10410e89a8eb",
+              "id": "7610a7b8-d850-4699-81c9-a76576cccb9a",
               "name": "Callback received",
               "originalRequest": {
                 "url": {
@@ -3565,7 +3639,7 @@
           }
         },
         {
-          "id": "3ca37131-bdce-4590-a74c-286d5041fcad",
+          "id": "c47556c3-645e-4f5c-a700-29122b893f23",
           "name": "Handle Alfalah payment callback",
           "request": {
             "name": "Handle Alfalah payment callback",
@@ -3587,7 +3661,7 @@
           },
           "response": [
             {
-              "id": "0678a46d-0192-47ae-94b3-3072ca72b164",
+              "id": "36e5fddc-c670-47ef-8b37-904201bd5663",
               "name": "Callback received",
               "originalRequest": {
                 "url": {
@@ -3748,15 +3822,9 @@
       }
     }
   ],
-  "variable": [
-    {
-      "type": "string",
-      "value": "{{baseUrl}}",
-      "key": "baseUrl"
-    }
-  ],
+  "variable": [],
   "info": {
-    "_postman_id": "b7c875b9-d1eb-4c5f-bfd5-ac19b4e85828",
+    "_postman_id": "2bac9e34-a40f-4323-89b5-aff819dd9323",
     "name": "ILMI Admin Portal API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {
