@@ -3,222 +3,185 @@ const path = require('path');
 const https = require('https');
 const OpenApiToPostman = require('openapi-to-postmanv2');
 
-// Environment configurations
 const ENVIRONMENTS = {
   local: {
     name: 'Local',
     baseUrl: 'http://localhost:3000',
-    swaggerUrl: 'http://localhost:3000/swagger-json',
-    description: 'Local development environment',
     outputName: 'ilmi-local',
   },
   development: {
     name: 'Development',
     baseUrl: 'http://dev-api.example.com',
-    swaggerUrl: 'http://dev-api.example.com/swagger-json',
-    description: 'Development server',
     outputName: 'ilmi-dev',
   },
   production: {
     name: 'Production',
     baseUrl: 'http://api.example.com',
-    swaggerUrl: 'http://api.example.com/swagger-json',
-    description: 'Production environment',
     outputName: 'ilmi-prod',
   },
 };
 
-// Get environment from command line or environment variable
-function getTargetEnvironment() {
-  const envArg = process.argv[2] || process.env.POSTMAN_ENV;
-
-  if (envArg && ENVIRONMENTS[envArg]) {
-    return ENVIRONMENTS[envArg];
-  }
-
-  // Fallback order: local -> dev -> prod
-  return ENVIRONMENTS.local;
-}
-
-// Pre-request script for token management
-const TOKEN_MANAGEMENT_PRE_REQUEST = `
-// Check if access token is expired or will expire soon
-const tokenExpiry = pm.environment.get('tokenExpiry');
-const currentTime = Date.now() / 1000;
+// Collection-level pre-request script
+const COLLECTION_PRE_REQUEST = `
+// Token management
 const accessToken = pm.environment.get('accessToken');
 const refreshToken = pm.environment.get('refreshToken');
+const tokenExpiry = pm.environment.get('tokenExpiry');
 
-// Helper function to check if token is expired
-function isTokenExpired(token) {
-  if (!token) return true;
-  const expiry = pm.environment.get('tokenExpiry');
-  if (!expiry) return true;
-  return Date.now() / 1000 >= expiry - 60;
+// console.log('=== Pre-request Script ===');
+// console.log('accessToken present:', !!accessToken);
+// console.log('refreshToken present:', !!refreshToken);
+// console.log('tokenExpiry present:', !!tokenExpiry);
+
+function isTokenExpired() {
+  if (!accessToken || !tokenExpiry) {
+    console.log('Token expired: missing token or expiry');
+    return true;
+  }
+  const expired = Date.now() / 1000 >= tokenExpiry - 60;
+  console.log('Token expired:', expired);
+  return expired;
 }
 
-// Helper function to refresh token
-async function refreshAccessToken() {
-  const refreshToken = pm.environment.get('refreshToken');
-  if (!refreshToken) {
-    console.log('No refresh token available');
-    return false;
-  }
-
-  const baseUrl = pm.environment.get('baseUrl');
-  
-  try {
-    const response = await pm.sendRequest({
-      url: baseUrl + '/auth/refresh',
-      method: 'POST',
-      header: {
-        'Content-Type': 'application/json'
-      },
-      body: {
-        mode: 'raw',
-        raw: JSON.stringify({ refreshToken })
-      }
-    });
-
-    if (response.code === 200) {
-      const data = response.json();
-      pm.environment.set('accessToken', data.accessToken);
-      if (data.refreshToken) {
-        pm.environment.set('refreshToken', data.refreshToken);
-      }
-      // Assume token expires in 1 hour (3600 seconds) if not provided
-      pm.environment.set('tokenExpiry', Math.floor(Date.now() / 1000) + 3600);
-      console.log('Token refreshed successfully');
-      return true;
-    } else {
-      console.log('Token refresh failed:', response.text());
-      return false;
-    }
-  } catch (err) {
-    console.log('Token refresh error:', err.message);
-    return false;
-  }
-}
-
-// Helper function to login
 async function login() {
+  console.log('🔐 Performing login...');
   const email = pm.environment.get('testEmail');
   const password = pm.environment.get('testPassword');
-  
   if (!email || !password) {
-    console.log('No test credentials available');
-    return false;
+    console.log('❌ Login failed: missing email or password');
+    return;
   }
 
-  const baseUrl = pm.environment.get('baseUrl');
-  
   try {
     const response = await pm.sendRequest({
-      url: baseUrl + '/auth/login',
+      url: pm.environment.get('baseUrl') + '/auth/login',
       method: 'POST',
-      header: {
-        'Content-Type': 'application/json'
-      },
-      body: {
-        mode: 'raw',
-        raw: JSON.stringify({ email, password })
-      }
+      header: { 'Content-Type': 'application/json' },
+      body: { mode: 'raw', raw: JSON.stringify({ email, password }) },
     });
 
-    if (response.code === 200) {
+    // console.log('Login response code:', response.code);
+
+    // Accept 200 or 201 as success
+    if (response.code === 200 || response.code === 201) {
       const data = response.json();
       pm.environment.set('accessToken', data.accessToken);
+      console.log('✅ accessToken saved');
       if (data.refreshToken) {
         pm.environment.set('refreshToken', data.refreshToken);
+        console.log('✅ refreshToken saved');
       }
-      // Assume token expires in 1 hour (3600 seconds) if not provided
       pm.environment.set('tokenExpiry', Math.floor(Date.now() / 1000) + 3600);
-      console.log('Login successful');
-      return true;
+      console.log('✅ tokenExpiry saved');
     } else {
-      console.log('Login failed:', response.text());
-      return false;
+      console.log('❌ Login failed with code:', response.code);
     }
-  } catch (err) {
-    console.log('Login error:', err.message);
-    return false;
+  } catch (error) {
+    console.log('❌ Login error:', error.message);
+  }
+}
+
+async function refreshAccessToken() {
+  console.log('🔄 Refreshing access token...');
+  if (!refreshToken) {
+    console.log('No refresh token, falling back to login');
+    return login();
+  }
+
+  try {
+    const response = await pm.sendRequest({
+      url: pm.environment.get('baseUrl') + '/auth/refresh',
+      method: 'POST',
+      header: { 'Content-Type': 'application/json' },
+      body: { mode: 'raw', raw: JSON.stringify({ refreshToken }) },
+    });
+
+    // console.log('Refresh response code:', response.code);
+
+    // Accept 200 or 201 as success
+    if (response.code === 200 || response.code === 201) {
+      const data = response.json();
+      pm.environment.set('accessToken', data.accessToken);
+      console.log('✅ accessToken saved after refresh');
+      if (data.refreshToken) {
+        pm.environment.set('refreshToken', data.refreshToken);
+        console.log('✅ refreshToken saved after refresh');
+      }
+      pm.environment.set('tokenExpiry', Math.floor(Date.now() / 1000) + 3600);
+      console.log('✅ tokenExpiry saved after refresh');
+    } else {
+      console.log('❌ Refresh failed, falling back to login');
+      await login();
+    }
+  } catch (error) {
+    console.log('❌ Refresh error:', error.message);
+    await login();
   }
 }
 
 // Main logic
-if (accessToken && !isTokenExpired(accessToken)) {
-  // Token is valid, proceed with request
-  console.log('Token is valid');
-} else if (refreshToken && !isTokenExpired(refreshToken)) {
-  // Token expired but refresh token is valid, try to refresh
-  console.log('Token expired, attempting refresh...');
-  const refreshed = await refreshAccessToken();
-  if (!refreshed) {
-    // Refresh failed, try login
-    console.log('Refresh failed, attempting login...');
-    await login();
+if (!accessToken || isTokenExpired()) {
+  console.log('Token missing or expired, need to authenticate');
+  if (refreshToken) {
+    console.log('Has refresh token, refreshing...');
+    refreshAccessToken();
+  } else {
+    console.log('No refresh token, logging in...');
+    login();
   }
 } else {
-  // No valid tokens, try login
-  console.log('No valid tokens, attempting login...');
-  await login();
+  console.log('✅ Token is valid');
 }
 `;
 
-// Pre-request script for requests that require authentication
-const AUTH_PRE_REQUEST_SCRIPT = `
-// Ensure we have a valid access token
-${TOKEN_MANAGEMENT_PRE_REQUEST}
-`;
+function fixBearerTokenVariable(collection) {
+  const tokenVariable = '{{bearerToken}}';
+  const correctTokenVariable = '{{accessToken}}';
 
-// Environment variables template
-function generateEnvironmentJson(envConfig) {
+  function replaceInObject(obj) {
+    if (Array.isArray(obj)) {
+      obj.forEach((item) => replaceInObject(item));
+    } else if (obj && typeof obj === 'object') {
+      for (const key of Object.keys(obj)) {
+        if (typeof obj[key] === 'string') {
+          obj[key] = obj[key].replace(tokenVariable, correctTokenVariable);
+        } else if (obj[key] && typeof obj[key] === 'object') {
+          replaceInObject(obj[key]);
+        }
+      }
+    }
+  }
+
+  replaceInObject(collection);
+}
+
+function generateEnvironmentJson(env) {
   const timestamp = new Date().toISOString();
   return {
-    name: `ILMI Admin Portal - ${envConfig.name}`,
-    id: `${envConfig.outputName}-env-id`,
+    name: `ILMI Admin Portal - ${env.name}`,
+    id: `${env.outputName}-env-id`,
     values: [
-      {
-        key: 'baseUrl',
-        value: envConfig.baseUrl,
-        type: 'text',
-        enabled: true,
-        description: `Base URL for ${envConfig.name} environment`,
-      },
+      { key: 'baseUrl', value: env.baseUrl, type: 'text', enabled: true },
       {
         key: 'accessToken',
         value: '',
-        type: 'text',
+        type: 'secret',
         enabled: true,
-        description: 'JWT access token for authentication',
       },
       {
         key: 'refreshToken',
         value: '',
-        type: 'text',
-        enabled: true,
-        description: 'Refresh token for obtaining new access tokens',
-      },
-      {
-        key: 'tokenExpiry',
-        value: '',
-        type: 'text',
-        enabled: true,
-        description: 'Unix timestamp when the access token expires',
-      },
-      {
-        key: 'testEmail',
-        value: 'admin@example.com',
-        type: 'text',
-        enabled: true,
-        description: 'Test email for automated token management',
-      },
-      {
-        key: 'testPassword',
-        value: 'your-password',
         type: 'secret',
         enabled: true,
-        description: 'Test password for automated token management',
       },
+      { key: 'tokenExpiry', value: '', type: 'text', enabled: true },
+      {
+        key: 'testEmail',
+        value: 'admin@ilmi.com',
+        type: 'text',
+        enabled: true,
+      },
+      { key: 'testPassword', value: 'admin123', type: 'secret', enabled: true },
     ],
     _postman_variable_scope: 'environment',
     _postman_exported_at: timestamp,
@@ -226,140 +189,13 @@ function generateEnvironmentJson(envConfig) {
   };
 }
 
-// Generate authentication requests
-function generateAuthRequests(envConfig) {
-  return {
-    name: 'Authentication',
-    item: [
-      {
-        name: 'Login',
-        request: {
-          method: 'POST',
-          header: [
-            {
-              key: 'Content-Type',
-              value: 'application/json',
-            },
-          ],
-          body: {
-            mode: 'raw',
-            raw: JSON.stringify(
-              {
-                email: '{{testEmail}}',
-                password: '{{testPassword}}',
-              },
-              null,
-              2,
-            ),
-          },
-          url: {
-            raw: '{{baseUrl}}/auth/login',
-            host: ['{{baseUrl}}'],
-            path: ['auth', 'login'],
-          },
-          description: 'Authenticate user and obtain access and refresh tokens',
-        },
-        response: [],
-      },
-      {
-        name: 'Refresh Token',
-        request: {
-          method: 'POST',
-          header: [
-            {
-              key: 'Content-Type',
-              value: 'application/json',
-            },
-          ],
-          body: {
-            mode: 'raw',
-            raw: JSON.stringify(
-              {
-                refreshToken: '{{refreshToken}}',
-              },
-              null,
-              2,
-            ),
-          },
-          url: {
-            raw: '{{baseUrl}}/auth/refresh',
-            host: ['{{baseUrl}}'],
-            path: ['auth', 'refresh'],
-          },
-          description: 'Refresh access token using refresh token',
-        },
-        response: [],
-      },
-      {
-        name: 'Logout',
-        request: {
-          method: 'POST',
-          header: [
-            {
-              key: 'Content-Type',
-              value: 'application/json',
-            },
-            {
-              key: 'Authorization',
-              value: 'Bearer {{accessToken}}',
-            },
-          ],
-          body: {
-            mode: 'raw',
-            raw: JSON.stringify(
-              {
-                refreshToken: '{{refreshToken}}',
-              },
-              null,
-              2,
-            ),
-          },
-          url: {
-            raw: '{{baseUrl}}/auth/logout',
-            host: ['{{baseUrl}}'],
-            path: ['auth', 'logout'],
-          },
-          description: 'Logout user and invalidate refresh token',
-        },
-        response: [],
-      },
-    ],
-  };
-}
-
-// Add pre-request scripts to collection
-function addPreRequestScripts(collection) {
-  // Add pre-request script to all requests
-  if (collection.item) {
-    collection.item.forEach((folder) => {
-      if (folder.item) {
-        folder.item.forEach((request) => {
-          if (request.request) {
-            request.request.preRequestScript = {
-              exec: AUTH_PRE_REQUEST_SCRIPT.split('\n'),
-            };
-          }
-        });
-      }
-    });
-  }
-  return collection;
-}
-
-// Fetch OpenAPI spec from URL
 function fetchOpenAPISpec(url) {
   return new Promise((resolve, reject) => {
-    const isHttps = url.startsWith('https');
-    const client = isHttps ? https : require('http');
-
+    const client = url.startsWith('https') ? https : require('http');
     client
       .get(url, (res) => {
         let data = '';
-
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-
+        res.on('data', (chunk) => (data += chunk));
         res.on('end', () => {
           try {
             const spec = JSON.parse(data);
@@ -369,175 +205,89 @@ function fetchOpenAPISpec(url) {
           }
         });
       })
-      .on('error', (err) => {
-        reject(err);
-      });
+      .on('error', (err) => reject(err));
   });
 }
 
-// Try multiple swagger endpoints
-async function fetchSwaggerSpec(baseUrl) {
+async function fetchSwaggerSpec() {
   const endpoints = [
-    `${baseUrl}/swagger-json`,
-    `${baseUrl}/api-json`,
-    `${baseUrl}/swagger/docs`,
+    `${ENVIRONMENTS.local.baseUrl}/swagger-json`,
+    `${ENVIRONMENTS.development.baseUrl}/swagger-json`,
+    `${ENVIRONMENTS.production.baseUrl}/swagger-json`,
   ];
 
-  for (const endpoint of endpoints) {
+  for (const url of endpoints) {
     try {
-      console.log(`Trying: ${endpoint}`);
-      const spec = await fetchOpenAPISpec(endpoint);
+      console.log(`Trying to fetch Swagger from: ${url}`);
+      const spec = await fetchOpenAPISpec(url);
       if (spec && spec.paths) {
-        console.log(`✅ Found OpenAPI spec at ${endpoint}`);
+        console.log(`✅ Found Swagger spec at ${url}`);
         return spec;
       }
     } catch (err) {
-      console.log(`❌ Failed: ${endpoint}`);
+      console.log(`❌ Failed at ${url}: ${err.message}`);
     }
   }
 
-  throw new Error('Could not fetch OpenAPI spec from any endpoint');
+  throw new Error('Could not fetch Swagger spec from any environment');
 }
 
-// Generate Postman collection for an environment
-async function generatePostmanCollection(envConfig) {
-  try {
-    console.log(
-      `\n📦 Generating collection for ${envConfig.name} environment...`,
-    );
-    console.log(`   Base URL: ${envConfig.baseUrl}`);
-    console.log(`   Swagger URL: ${envConfig.swaggerUrl}`);
+async function generatePostmanCollection() {
+  const spec = await fetchSwaggerSpec();
+  if (spec.servers)
+    spec.servers[0] = {
+      url: '{{baseUrl}}',
+      description: 'Server URL from environment',
+    };
 
-    const spec = await fetchSwaggerSpec(envConfig.baseUrl);
+  return new Promise((resolve, reject) => {
+    OpenApiToPostman.convert(
+      { type: 'json', data: spec },
+      { folderStrategy: 'Tags' },
+      (err, result) => {
+        if (err || !result.result)
+          return reject(err || new Error(result.reason));
 
-    // Update server URL in spec
-    if (spec.servers) {
-      spec.servers[0] = {
-        url: envConfig.baseUrl,
-        description: `${envConfig.name} server`,
-      };
-    }
+        let collection = result.output[0].data;
+        collection.info.name = 'ILMI Admin Portal API';
 
-    // Convert OpenAPI to Postman collection
-    return new Promise((resolve, reject) => {
-      OpenApiToPostman.convert(
-        { type: 'json', data: spec },
-        {
-          folderStrategy: 'Tags',
-          includeAuthInfoInRequest: true,
-          requestNameStrategy: 'FOLDER',
-        },
-        (err, conversionResult) => {
-          if (err) {
-            reject(err);
-            return;
-          }
+        // Fix token variable name mismatch: replace {{bearerToken}} with {{accessToken}}
+        fixBearerTokenVariable(collection);
 
-          if (!conversionResult.result) {
-            reject(new Error(conversionResult.reason));
-            return;
-          }
+        collection.event = [
+          {
+            listen: 'prerequest',
+            script: {
+              type: 'text/javascript',
+              exec: COLLECTION_PRE_REQUEST.split('\n'),
+            },
+          },
+        ];
 
-          let collection = conversionResult.output[0].data;
+        const outputDir = path.join(__dirname, '..', 'postman');
+        if (!fs.existsSync(outputDir))
+          fs.mkdirSync(outputDir, { recursive: true });
 
-          // Add authentication folder at the beginning
-          const authRequests = generateAuthRequests(envConfig);
-          collection.item = [authRequests, ...collection.item];
+        fs.writeFileSync(
+          path.join(outputDir, 'ilmi-admin-portal.postman_collection.json'),
+          JSON.stringify(collection, null, 2),
+        );
+        console.log('✅ Collection saved.');
 
-          // Add pre-request scripts
-          collection = addPreRequestScripts(collection);
-
-          // Update collection info
-          collection.info.name = `ILMI Admin Portal API - ${envConfig.name}`;
-          collection.info.description = {
-            content: `Postman collection for ILMI Admin Portal API - ${envConfig.name} environment\n\n## Authentication\n\nThis collection includes pre-request scripts for automatic token management:\n\n1. **Login**: POST {{baseUrl}}/auth/login with email/password\n2. **Refresh Token**: POST {{baseUrl}}/auth/refresh with refreshToken\n3. **Logout**: POST {{baseUrl}}/auth/logout with Authorization header\n\n## Environment Variables\n\nMake sure to set the following environment variables:\n- \`baseUrl\`: Base URL for the API\n- \`testEmail\`: Test email for automated login\n- \`testPassword\`: Test password for automated login`,
-            type: 'text/markdown',
-          };
-
-          // Create output directory if it doesn't exist
-          const outputDir = path.join(__dirname, '..', 'postman');
-          if (!fs.existsSync(outputDir)) {
-            fs.mkdirSync(outputDir, { recursive: true });
-          }
-
-          // Save collection
-          const collectionPath = path.join(
-            outputDir,
-            `${envConfig.outputName}.postman_collection.json`,
+        // Save environments
+        for (const e of Object.values(ENVIRONMENTS)) {
+          const envJson = generateEnvironmentJson(e);
+          fs.writeFileSync(
+            path.join(outputDir, `${e.outputName}.postman_environment.json`),
+            JSON.stringify(envJson, null, 2),
           );
-          fs.writeFileSync(collectionPath, JSON.stringify(collection, null, 2));
-          console.log(`✅ Collection saved: ${collectionPath}`);
+          console.log(`✅ Environment saved: ${e.name}`);
+        }
 
-          // Save environment
-          const envJson = generateEnvironmentJson(envConfig);
-          const envPath = path.join(
-            outputDir,
-            `${envConfig.outputName}.postman_environment.json`,
-          );
-          fs.writeFileSync(envPath, JSON.stringify(envJson, null, 2));
-          console.log(`✅ Environment saved: ${envPath}`);
-
-          resolve({ collectionPath, envPath });
-        },
-      );
-    });
-  } catch (error) {
-    console.error(
-      `❌ Failed to generate Postman collection for ${envConfig.name}:`,
-      error.message,
+        resolve();
+      },
     );
-    console.log(
-      `💡 Make sure the application is running on ${envConfig.baseUrl}`,
-    );
-    throw error;
-  }
+  });
 }
 
-// Main function
-async function main() {
-  console.log('🚀 Postman Collection Generator');
-  console.log('================================\n');
-
-  const targetEnv = process.argv[2];
-
-  if (targetEnv && ENVIRONMENTS[targetEnv]) {
-    // Generate for specific environment
-    await generatePostmanCollection(ENVIRONMENTS[targetEnv]);
-  } else {
-    // Generate for all environments
-    console.log('Generating collections for all environments...\n');
-
-    for (const [key, envConfig] of Object.entries(ENVIRONMENTS)) {
-      try {
-        await generatePostmanCollection(envConfig);
-      } catch (err) {
-        console.error(`Skipping ${envConfig.name} due to error`);
-      }
-    }
-  }
-
-  console.log('\n✨ Generation complete!');
-  console.log('\n📁 Output directory: postman/');
-  console.log('\nUsage:');
-  console.log(
-    '  node generate-postman.js          # Generate for all environments',
-  );
-  console.log('  node generate-postman.js local    # Generate for local only');
-  console.log(
-    '  node generate-postman.js development  # Generate for dev only',
-  );
-  console.log(
-    '  node generate-postman.js production  # Generate for prod only',
-  );
-  console.log('\nTo import into Postman:');
-  console.log('  1. Open Postman');
-  console.log('  2. Click Import');
-  console.log('  3. Select the collection JSON file');
-  console.log('  4. Click the gear icon (⚙️) to manage environments');
-  console.log('  5. Import the environment JSON file');
-  console.log('  6. Select the imported environment');
-  console.log('  7. Set testEmail and testPassword in the environment');
-}
-
-// Run main function
-main().catch(console.error);
+generatePostmanCollection().catch(console.error);

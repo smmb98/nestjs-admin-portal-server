@@ -721,7 +721,7 @@ curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
   -H "User-Agent: Mozilla/5.0" \
   -d '{
-    "email": "admin@example.com",
+    "email": "admin@ilmi.com",
     "password": "password123"
   }'
 ```
@@ -736,7 +736,7 @@ curl -X POST http://localhost:3000/auth/login \
   "tokenType": "Bearer",
   "user": {
     "id": 1,
-    "email": "admin@example.com",
+    "email": "admin@ilmi.com",
     "role": "ADMIN",
     "organizationId": null
   }
@@ -776,7 +776,7 @@ curl -X POST http://localhost:3000/auth/refresh \
   "tokenType": "Bearer",
   "user": {
     "id": 1,
-    "email": "admin@example.com",
+    "email": "admin@ilmi.com",
     "role": "ADMIN",
     "organizationId": null
   }

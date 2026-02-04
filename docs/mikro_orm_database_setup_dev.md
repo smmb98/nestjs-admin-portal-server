@@ -131,7 +131,7 @@ export class DatabaseSeeder extends Seeder {
     });
 
     em.create(User, {
-      email: 'admin@example.com',
+      email: 'admin@ilmi.com',
       password: 'hashed-password',
       organization: org,
       role: 'admin',
