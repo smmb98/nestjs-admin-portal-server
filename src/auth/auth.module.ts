@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
 import { User } from '../entities/User';
 import { License } from '../entities/License';
+import { RefreshToken } from '../entities/RefreshToken';
 
 @Module({
   imports: [
@@ -17,11 +18,11 @@ import { License } from '../entities/License';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: '15m' },
       }),
       inject: [ConfigService],
     }),
-    MikroOrmModule.forFeature([User, License]),
+    MikroOrmModule.forFeature([User, License, RefreshToken]),
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],

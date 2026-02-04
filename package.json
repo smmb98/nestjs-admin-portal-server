@@ -19,6 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "postman:generate": "node scripts/generate-postman.js",
+    "mikro-orm": "mikro-orm",
     "docker:build": "docker build -t ilmi-admin-portal-server .",
     "docker:run": "docker run -p 3000:3000 --env-file .env ilmi-admin-portal-server",
     "docker:up": "docker-compose up -d",

@@ -21,6 +21,7 @@ import { Subscription } from './src/entities/Subscription';
 import { Payment } from './src/entities/Payment';
 import { Message } from './src/entities/Message';
 import { Conversation } from './src/entities/Conversation';
+import { RefreshToken } from './src/entities/RefreshToken';
 
 const config = defineConfig({
   clientUrl: process.env.DATABASE_URL,
@@ -37,6 +38,7 @@ const config = defineConfig({
     Payment,
     Message,
     Conversation,
+    RefreshToken,
   ],
   migrations: {
     path: 'dist/migrations',
