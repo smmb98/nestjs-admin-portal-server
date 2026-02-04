@@ -22,6 +22,8 @@ import { Payment } from './src/entities/Payment';
 import { Message } from './src/entities/Message';
 import { Conversation } from './src/entities/Conversation';
 import { RefreshToken } from './src/entities/RefreshToken';
+import { SeedManager } from '@mikro-orm/seeder';
+import { Migrator } from '@mikro-orm/migrations';
 
 const config = defineConfig({
   clientUrl: process.env.DATABASE_URL,
@@ -40,8 +42,9 @@ const config = defineConfig({
     Conversation,
     RefreshToken,
   ],
+  extensions: [SeedManager, Migrator],
   migrations: {
-    path: 'dist/migrations',
+    path: 'dist/src/migrations',
     pathTs: 'src/migrations',
   },
 });

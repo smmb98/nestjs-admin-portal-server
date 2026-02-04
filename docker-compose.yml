@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   app-dev:
     profiles: ["dev"]
@@ -12,6 +10,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+      - DOCKER=1
       - DATABASE_URL=postgresql://ilmi_user:ilmi_password@db:5432/ilmi_admin_portal
       - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-here-change-in-production}
       - JWT_EXPIRES_IN=1h
@@ -34,7 +33,7 @@ services:
       args:
         MODE: production
     ports:
-      - "3001:3000"
+      - "3001:3001"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://ilmi_user:ilmi_password@db:5432/ilmi_admin_portal
@@ -42,7 +41,7 @@ services:
       - JWT_EXPIRES_IN=1h
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_your_stripe_secret_key_here}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_your_webhook_secret_here}
-      - PORT=3000
+      - PORT=3001
     depends_on:
       - db
     networks:
@@ -51,6 +50,9 @@ services:
   db:
     profiles: ["dev", "prod"]
     image: postgres:17
+    command: postgres -c 'listen_addresses=*'
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: ilmi_admin_portal
       POSTGRES_USER: ilmi_user
